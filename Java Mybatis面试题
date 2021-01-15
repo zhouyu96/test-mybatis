@@ -1,0 +1,106 @@
+Java Mybatis面试题
+MyBatis 是一款优秀的持久层（orm）框架，它支持定制化 SQL、存储过程以及高级映射。
+1.mybatis是怎样的框架，如何连接数据库，如何配置
+2.
+3.Student.xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<!DOCTYPE mapper  
+3.        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+4.        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+5.  
+6.<!--parameterType：要求输入参数的类型  
+7.    resultType：输出的类型-->  
+8.<mapper namespace="pojo">  
+9.    <select id="listStudent" resultType="Student">  
+10.        select * from  student  
+11.    </select>  
+12.  
+13.    <insert id="AddStudent" parameterType="Student">  
+14.        insert into student (id,studentID,name) values (#{id},#{studentID},#{name})  
+15.    </insert>  
+16.  
+17.    <delete id="DelStudent" parameterType="Student">  
+18.        delete from student where id=#{id}  
+19.    </delete>  
+20.  
+21.    <update id="UpdateStudent" parameterType="Student">  
+22.        update student set name=#{name} where id=#{id}  
+23.    </update>  
+24.  
+25.    <select id="getStudent" parameterType="int" resultType="Student">  
+26.        select * from student where id=#{id}  
+27.    </select>  
+28.</mapper>
+4.JAVA测试代码
+1.package test;  
+2.  
+3.import org.apache.ibatis.io.Resources;  
+4.import org.apache.ibatis.session.SqlSession;  
+5.import org.apache.ibatis.session.SqlSessionFactory;  
+6.import org.apache.ibatis.session.SqlSessionFactoryBuilder;  
+7.import pojo.Student;  
+8.  
+9.import java.io.IOException;  
+10.import java.io.InputStream;  
+11.import java.util.List;  
+12.  
+13.public class TestMyBatis {  
+14.  
+15.    public static void main(String[] args) throws IOException {  
+16.        // 根据 mybatis-config.xml 配置的信息得到 sqlSessionFactory  
+17.        String resource = "mybatis-config.xml";  
+18.        InputStream inputStream = Resources.getResourceAsStream(resource);  
+19.        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);  
+20.        // 然后根据 sqlSessionFactory 得到 session  
+21.        SqlSession session = sqlSessionFactory.openSession();  
+22.  
+23.        //增加学生  
+24.        Student student1=new Student();  
+25.        student1.setId(5);  
+26.        student1.setStudentID(5);  
+27.        student1.setName("增加的学生");  
+28.        session.insert("AddStudent",student1);  
+29.  
+30.        //删除学生  
+31.        Student student2=new Student();  
+32.        student2.setId(1);  
+33.        session.delete("DelStudent",student2);  
+34.  
+35.        //修改学生  
+36.        Student student3=new Student();  
+37.        student3.setId(2);  
+38.        student3.setName("修改的学生");  
+39.        session.update("UpdateStudent",student3);  
+40.  
+41.        //获取单个学生  
+42.        Student student4=new Student();  
+43.        student4.setId(2);  
+44.        session.selectOne("getStudent",student4);  
+45.  
+46.  
+47.        // 最后通过 session 的 selectList() 方法调用 sql 语句 listStudent  
+48.        List<Student> listStudent = session.selectList("listStudent");  
+49.        for (Student student : listStudent) {  
+50.            System.out.println("ID:" + student.getId() + ",NAME:" + student.getName());  
+51.        }  
+52.  
+53.        session.commit();  
+54.        session.close();  
+55.    }  
+56.}  
+5.特点：
+①简单易学：本身就很小且简单。没有任何第三方依赖，最简单安装只要两个jar文件+配置几个sql映射文件易于学习，易于使用，通过文档和源代码，可以比较完全的掌握它的设计思路和实现。
+
+②灵活：mybatis不会对应用程序或者数据库的现有设计强加任何影响。 sql写在xml里，便于统一管理和优化。通过sql语句可以满足操作数据库的所有需求。
+
+③解除sql与程序代码的耦合：通过提供DAO层，将业务逻辑和数据访问逻辑分离，使系统的设计更清晰，更易维护，更易单元测试。sql和代码的分离，提高了可维护性。
+
+④提供映射标签，支持对象与数据库的orm字段关系映射
+
+⑤提供对象关系映射标签，支持对象关系组建维护
+
+⑥提供xml标签，支持编写动态sql。
+
+#{}和${}的区别是什么？
+1.#{}实际上传的参数，经过预编译处理，可以有效的防止sql注入
+2. ${}使用的占位符，直接将参数传到拼接的sql语句中，在分表操作中使用的多
