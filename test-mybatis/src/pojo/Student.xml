@@ -3,8 +3,26 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+<!--parameterType：要求输入参数的类型
+    resultType：输出的类型-->
 <mapper namespace="pojo">
     <select id="listStudent" resultType="Student">
         select * from  student
+    </select>
+
+    <insert id="AddStudent" parameterType="Student">
+        insert into student (id,studentID,name) values (#{id},#{studentID},#{name})
+    </insert>
+
+    <delete id="DelStudent" parameterType="Student">
+        delete from student where id=#{id}
+    </delete>
+
+    <update id="UpdateStudent" parameterType="Student">
+        update student set name=#{name} where id=#{id}
+    </update>
+
+    <select id="getStudent" parameterType="int" resultType="Student">
+        select * from student where id=#{id}
     </select>
 </mapper>
